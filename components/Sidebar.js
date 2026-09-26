@@ -50,15 +50,19 @@ export default function Sidebar() {
 
       <style>{`
         .sidebar {
-          width: 88px;
-          min-height: 100vh;
-          background: linear-gradient(180deg, #ff8c42 0%, #ff6a1f 100%);
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          padding: 20px 0;
-          gap: 32px;
-          font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+            width: 88px;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            align-self: flex-start;
+            background: #14102b;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            gap: 32px;
+            font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+            overflow: hidden;
         }
 
         .spacer {
