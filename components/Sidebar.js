@@ -2,16 +2,20 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useRequireAuth } from "@/lib/authGuard";
 
 const navItems = [
   { label: "Listings", href: "/listings", icon: ListingsIcon },
   { label: "Roommates", href: "/roommates", icon: RoommatesIcon },
-  { label: "My House", href: "/my-house", icon: HouseIcon },
-  { label: "Me", href: "/me", icon: MeIcon },
+  { label: "My House", href: "/myhouse", icon: HouseIcon },
+  { label: "Chat", href: "/chat", icon: ChatIcon },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { userAgent } = useRequireAuth();
+
+  const meActive = pathname === "/me";
 
   return (
     <aside className="sidebar">
@@ -33,6 +37,17 @@ export default function Sidebar() {
         })}
       </nav>
 
+      <div className="spacer" />
+
+      <Link href="/me" className={`nav-btn me-btn ${meActive ? "active" : ""}`}>
+        {userAgent?.photoURL ? (
+          <img src={userAgent.photoURL} alt="Your profile" className="avatar" />
+        ) : (
+          <MeIcon />
+        )}
+        <span>Me</span>
+      </Link>
+
       <style>{`
         .sidebar {
           width: 88px;
@@ -44,6 +59,26 @@ export default function Sidebar() {
           padding: 20px 0;
           gap: 32px;
           font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        }
+
+        .spacer {
+          flex: 1;
+        }
+
+        .me-btn {
+          margin-bottom: 4px;
+        }
+
+        .avatar {
+          width: 26px;
+          height: 26px;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 2px solid rgba(255, 255, 255, 0.7);
+        }
+
+        .nav-btn.active .avatar {
+          border-color: #ff6a1f;
         }
 
         .brand {
@@ -118,6 +153,14 @@ function HouseIcon() {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M3 11l9-7 9 7" />
       <path d="M5 10v10h14V10" />
+    </svg>
+  );
+}
+
+function ChatIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
     </svg>
   );
 }

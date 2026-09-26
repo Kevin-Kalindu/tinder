@@ -1,5 +1,6 @@
 "use client"
 
+import Sidebar from "@/components/Sidebar"
 import Loader from "@/components/loader"
 import { useRequireAuth } from "@/lib/authGuard"
 function Me(){
@@ -8,7 +9,12 @@ function Me(){
         return <Loader/>
     }
     return(
-        <div>Me</div>
+        <div style={{ display: "flex" }}>
+        <Sidebar />
+        <main style={{ flex: 1 }}>
+            <h1>Me</h1>
+        </main>
+    </div>
     )
 }
 

@@ -1,5 +1,6 @@
 "use client"
 
+import Sidebar from "@/components/Sidebar"
 import Loader from "@/components/loader"
 import { useRequireAuth } from "@/lib/authGuard"
 function Chat(){
@@ -8,7 +9,12 @@ function Chat(){
         return <Loader/>
     }
     return(
-        <div>chat</div>
+        <div style={{ display: "flex" }}>
+        <Sidebar />
+        <main style={{ flex: 1 }}>
+            <h1>Chat</h1>
+        </main>
+    </div>
     )
 }
 

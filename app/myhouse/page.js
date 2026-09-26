@@ -1,5 +1,6 @@
 "use client"
 
+import Sidebar from "@/components/Sidebar"
 import Loader from "@/components/loader"
 import { useRequireAuth } from "@/lib/authGuard"
 function MyHouse(){
@@ -8,7 +9,12 @@ function MyHouse(){
         return <Loader/>
     }
     return(
-        <div>My House</div>
+        <div style={{ display: "flex" }}>
+        <Sidebar />
+        <main style={{ flex: 1 }}>
+            <h1>My House</h1>
+        </main>
+    </div>
     )
 }
 
