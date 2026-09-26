@@ -1,10 +1,11 @@
 "use client"
 
+import Loader from "@/components/loader"
 import { useRequireAuth } from "@/lib/authGuard"
 function Me(){
     const {user, loading} = useRequireAuth()
     if (loading){
-        return <div>Loading...</div>
+        return <Loader/>
     }
     return(
         <div>Me</div>
