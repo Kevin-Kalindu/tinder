@@ -345,6 +345,8 @@ function MyHouse() {
   }
 
   return (
+    <div>
+        {fetching && <Loader/>}
     <div style={{ display: "flex", background: "#ffffff", minHeight: "100vh" }}>
       <Sidebar />
       <main
@@ -355,8 +357,6 @@ function MyHouse() {
           fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif",
         }}
       >
-
-        {fetching && <p style={{ color: "#888888" }}>Loading listings...</p>}
         {!fetching && error && <p style={{ color: "#ef4444" }}>{error}</p>}
         {!fetching && !error && listings.length === 0 && (
           <p style={{ color: "#888888" }}>No listings to show right now.</p>
@@ -374,6 +374,7 @@ function MyHouse() {
           ))}
         </div>
       </main>
+    </div>
     </div>
   );
 }

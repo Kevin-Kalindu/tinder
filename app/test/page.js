@@ -10,8 +10,6 @@ import {
   updateDoc,
   arrayUnion,
 } from "firebase/firestore";
-import { useSpring, animated } from "@react-spring/web";
-import { useDrag } from "@use-gesture/react";
 
 import { db } from "@/lib/firebase";
 import { useRequireAuth } from "@/lib/authGuard";
@@ -24,136 +22,166 @@ const SWIPE_THRESHOLD = 120; // px of horizontal drag before a card commits to s
 const ROTATION_FACTOR = 0.08; // deg of tilt per px dragged
 
 function RoommateCard({ user, onSwipe, isTop }) {
+  const cardRef = useRef(null);
+  const dragState = useRef({ startX: 0, startY: 0, dragging: false });
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [dragging, setDragging] = useState(false);
   const [exiting, setExiting] = useState(null); // "left" | "right" | null
 
-  const [{ x, y, rot, scale }, api] = useSpring(() => ({
-    x: 0,
-    y: 0,
-    rot: 0,
-    scale: 1,
-    config: { tension: 300, friction: 28 },
-  }));
+  const handlePointerDown = (e) => {
+    if (!isTop || exiting) return;
+    dragState.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      dragging: true,
+    };
+    setDragging(true);
+    cardRef.current?.setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e) => {
+    if (!dragState.current.dragging) return;
+    const dx = e.clientX - dragState.current.startX;
+    const dy = e.clientY - dragState.current.startY;
+    setOffset({ x: dx, y: dy });
+  };
 
   const commitSwipe = (direction) => {
     setExiting(direction);
-    const flyX = direction === "right" ? 600 : -600;
-    api.start({
-      x: flyX,
-      rot: direction === "right" ? 30 : -30,
-      config: { tension: 200, friction: 24 },
-    });
+    setDragging(false);
     // Let the exit animation play before removing the card from the stack
     setTimeout(() => onSwipe(direction, user), 220);
   };
 
-  const bind = useDrag(
-    ({ down, movement: [mx, my], velocity: [vx], direction: [dx], cancel }) => {
-      if (!isTop || exiting) return;
+  const handlePointerUp = () => {
+    if (!dragState.current.dragging) return;
+    dragState.current.dragging = false;
+    setDragging(false);
 
-      // If dragged past threshold and released, cancel the gesture and commit
-      if (!down && Math.abs(mx) > SWIPE_THRESHOLD) {
-        cancel();
-        commitSwipe(mx > 0 ? "right" : "left");
-        return;
-      }
-
-      // Fast flick, even under threshold, also commits
-      if (!down && Math.abs(vx) > 0.5 && Math.abs(mx) > 40) {
-        cancel();
-        commitSwipe(dx > 0 ? "right" : "left");
-        return;
-      }
-
-      api.start({
-        x: down ? mx : 0,
-        y: down ? my : 0,
-        rot: down ? mx * ROTATION_FACTOR : 0,
-        scale: down ? 1.02 : 1,
-        immediate: down,
-      });
-    },
-    { enabled: isTop && !exiting }
-  );
-
-  // Programmatic swipe, used by the Pass / Like buttons
-  const triggerSwipe = (direction) => {
-    if (exiting) return;
-    commitSwipe(direction);
+    if (offset.x > SWIPE_THRESHOLD) {
+      commitSwipe("right");
+    } else if (offset.x < -SWIPE_THRESHOLD) {
+      commitSwipe("left");
+    } else {
+      setOffset({ x: 0, y: 0 });
+    }
   };
 
-  const likeOpacity = x.to((v) => Math.min(Math.max(v / SWIPE_THRESHOLD, 0), 1));
-  const nopeOpacity = x.to((v) => Math.min(Math.max(-v / SWIPE_THRESHOLD, 0), 1));
+  // Programmatic swipe, used by the Pass / Like buttons
+//   const triggerSwipe = (direction) => {
+//     if (exiting) return;
+//     setOffset({ x: direction === "right" ? 400 : -400, y: 0 });
+//     commitSwipe(direction);
+//   };
+// Programmatic swipe, used by the Pass / Like buttons
+const triggerSwipe = (direction) => {
+    if (exiting) return;
+  
+    const flyX = direction === "right" ? 400 : -400;
+  
+    // Phase 1: move the card out to the same offset a real drag would reach,
+    // so the LIKE/NOPE stamp and tilt appear exactly like mid-swipe.
+    setOffset({ x: flyX, y: 0 });
+  
+    // Phase 2: let that frame paint, then commit the exit — same as
+    // releasing a drag past the threshold.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        commitSwipe(direction);
+      });
+    });
+  };
+
+  let transform = `translate(${offset.x}px, ${offset.y}px) rotate(${
+    offset.x * ROTATION_FACTOR
+  }deg)`;
+  let transition = dragging ? "none" : "transform 0.25s ease, opacity 0.25s ease";
+  let opacity = 1;
+
+  if (exiting) {
+    const flyX = exiting === "right" ? 600 : -600;
+    transform = `translate(${flyX}px, ${offset.y}px) rotate(${
+      exiting === "right" ? 30 : -30
+    }deg)`;
+    opacity = 0;
+  }
+
+  const likeOpacity = Math.min(Math.max(offset.x / SWIPE_THRESHOLD, 0), 1);
+  const nopeOpacity = Math.min(Math.max(-offset.x / SWIPE_THRESHOLD, 0), 1);
 
   return (
-    <animated.div
-      {...bind()}
+    <div
+      ref={cardRef}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
       style={{
         position: "absolute",
         inset: 0,
         margin: "0 auto",
         width: "100%",
-        maxWidth: 360,
-        height: 560,
-        borderRadius: 20,
+        maxWidth: 440,
+        height: 680,
+        borderRadius: 28,
         background: "#fff",
-        boxShadow: "0 12px 30px rgba(0,0,0,0.18)",
+        boxShadow: "0 24px 60px rgba(0,0,0,0.16), 0 4px 14px rgba(0,0,0,0.08)",
         overflow: "hidden",
         touchAction: "none",
-        cursor: isTop ? "grab" : "default",
-        x,
-        y,
-        scale,
-        rotate: rot,
-        opacity: exiting ? x.to((v) => 1 - Math.min(Math.abs(v) / 600, 1)) : 1,
+        cursor: isTop ? (dragging ? "grabbing" : "grab") : "default",
+        transform,
+        transition,
+        opacity,
         display: "flex",
         flexDirection: "column",
         userSelect: "none",
+        border: "1px solid rgba(0,0,0,0.04)",
       }}
     >
       {/* LIKE / NOPE stamps */}
-      <animated.div
+      <div
         style={{
           position: "absolute",
-          top: 24,
-          left: 20,
-          padding: "6px 14px",
-          border: "3px solid #22c55e",
-          borderRadius: 8,
+          top: 32,
+          left: 28,
+          padding: "8px 18px",
+          border: "4px solid #22c55e",
+          borderRadius: 10,
           color: "#22c55e",
           fontWeight: 800,
-          fontSize: 22,
-          letterSpacing: 1,
+          fontSize: 28,
+          letterSpacing: 1.5,
           transform: "rotate(-14deg)",
           opacity: likeOpacity,
           zIndex: 2,
         }}
       >
         LIKE
-      </animated.div>
-      <animated.div
+      </div>
+      <div
         style={{
           position: "absolute",
-          top: 24,
-          right: 20,
-          padding: "6px 14px",
-          border: "3px solid #ef4444",
-          borderRadius: 8,
+          top: 32,
+          right: 28,
+          padding: "8px 18px",
+          border: "4px solid #ef4444",
+          borderRadius: 10,
           color: "#ef4444",
           fontWeight: 800,
-          fontSize: 22,
-          letterSpacing: 1,
+          fontSize: 28,
+          letterSpacing: 1.5,
           transform: "rotate(14deg)",
           opacity: nopeOpacity,
           zIndex: 2,
         }}
       >
         NOPE
-      </animated.div>
+      </div>
 
       {/* Photo */}
       <div
         style={{
-          height: 260,
+          height: 340,
           flexShrink: 0,
           background: user.picture
             ? `center / cover no-repeat url(${user.picture})`
@@ -165,24 +193,24 @@ function RoommateCard({ user, onSwipe, isTop }) {
         <div
           style={{
             width: "100%",
-            padding: "40px 18px 14px",
+            padding: "56px 24px 20px",
             background:
-              "linear-gradient(to top, rgba(0,0,0,0.65), rgba(0,0,0,0))",
+              "linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0))",
             color: "#fff",
           }}
         >
-          <div style={{ fontSize: 22, fontWeight: 700 }}>
+          <div style={{ fontSize: 30, fontWeight: 800, letterSpacing: "-0.01em" }}>
             {user.name}
             {user.age ? `, ${user.age}` : ""}
           </div>
           {user.program && (
-            <div style={{ fontSize: 14, opacity: 0.9 }}>{user.program}</div>
+            <div style={{ fontSize: 16, opacity: 0.92, marginTop: 4 }}>{user.program}</div>
           )}
         </div>
       </div>
 
       {/* Details, scrollable if content is long */}
-      <div style={{ padding: 16, overflowY: "auto", flex: 1 }}>
+      <div style={{ padding: "22px 24px", overflowY: "auto", flex: 1 }}>
         {user.budget != null && (
           <p style={row}>
             <strong>Budget:</strong> ${user.budget}
@@ -226,10 +254,10 @@ function RoommateCard({ user, onSwipe, isTop }) {
         )}
         {user.description && (
           <>
-            <p style={{ ...row, marginTop: 10 }}>
-              <strong>About:</strong>
+            <p style={{ ...row, marginTop: 14, fontSize: 13, textTransform: "uppercase", letterSpacing: "0.05em", color: "#9ca3af" }}>
+              About
             </p>
-            <p style={{ margin: 0, color: "#374151" }}>{user.description}</p>
+            <p style={{ margin: 0, color: "#374151", lineHeight: 1.6, fontSize: 15 }}>{user.description}</p>
           </>
         )}
       </div>
@@ -240,11 +268,11 @@ function RoommateCard({ user, onSwipe, isTop }) {
           style={{
             display: "flex",
             justifyContent: "center",
-            gap: 24,
-            padding: "12px 0 18px",
+            gap: 32,
+            padding: "18px 0 26px",
           }}
         >
-          <button
+          {/* <button
             onClick={() => triggerSwipe("left")}
             aria-label="Pass"
             style={circleButton("#ef4444")}
@@ -257,36 +285,37 @@ function RoommateCard({ user, onSwipe, isTop }) {
             style={circleButton("#22c55e")}
           >
             ♥
-          </button>
+          </button> */}
         </div>
       )}
-    </animated.div>
+    </div>
   );
 }
 
-const row = { margin: "6px 0", fontSize: 14, color: "#111827" };
+const row = { margin: "8px 0", fontSize: 15, color: "#111827", lineHeight: 1.5 };
 
 function circleButton(color) {
   return {
-    width: 56,
-    height: 56,
+    width: 68,
+    height: 68,
     borderRadius: "50%",
-    border: `2px solid ${color}`,
+    border: `2.5px solid ${color}`,
     background: "#fff",
     color,
-    fontSize: 22,
+    fontSize: 26,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     cursor: "pointer",
-    boxShadow: "0 4px 10px rgba(0,0,0,0.12)",
+    boxShadow: "0 8px 20px rgba(0,0,0,0.14)",
+    transition: "transform 0.15s ease, box-shadow 0.15s ease",
   };
 }
 
 function Roommates() {
   const { userAgent, loading } = useRequireAuth();
 
-  const [myId, setMyId] = useState(null);
+  const [myId, setMyId] = useState(null); // this user's app-level "id" (the U001-style doc id)
   const [profiles, setProfiles] = useState([]);
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState(null);
@@ -301,6 +330,8 @@ function Roommates() {
       setError(null);
 
       try {
+        // Find this account's own profile by email — the only link back to
+        // the signed-in Firebase Auth user — to get its "id" (e.g. "U001").
         const usersRef = collection(db, "users");
         const meQuery = query(usersRef, where("email", "==", userAgent.email));
         const meSnap = await getDocs(meQuery);
@@ -319,24 +350,31 @@ function Roommates() {
         }
 
         const json = await res.json();
+        console.log("roommates API response:", json);
 
+        // Get only the TOP 30 roommate suggestions
         const ids = (json.suggested_roommates || [])
           .slice(0, 30)
           .map((roommate) => roommate.id);
+        console.log("Firestore ids being searched for:", ids);
 
         if (ids.length === 0) {
           setProfiles([]);
           return;
         }
 
+        // Firestore allows max 30 values in an "in" query
         const q = query(usersRef, where("id", "in", ids));
         const snapshot = await getDocs(q);
 
+        // Convert Firestore documents into normal objects
+        // (named docSnap so it doesn't shadow the `doc()` ref helper used below)
         const users = snapshot.docs.map((docSnap) => ({
           firestoreId: docSnap.id,
           ...docSnap.data(),
         }));
 
+        console.log("Matching Firestore profiles found:", users);
         setProfiles(users);
       } catch (err) {
         console.error("Failed to load roommates", err);
@@ -349,12 +387,21 @@ function Roommates() {
     loadRoommates();
   }, [userAgent]);
 
+  // Adds *my* app-level id to the other person's "requests" array in
+  // Firestore, so their side can see an incoming friend request from me.
   const sendFriendRequest = async (targetId) => {
-    if (!myId) return;
+    if (!myId) {
+      console.warn("sendFriendRequest skipped: myId is not set yet");
+      return;
+    }
+
+    console.log(`Sending friend request: adding "${myId}" to users/${targetId}.requests`);
+
     try {
       await updateDoc(doc(db, "users", targetId), {
         requests: arrayUnion(myId),
       });
+      console.log(`Friend request written successfully to users/${targetId}`);
     } catch (err) {
       console.error(`Failed to send friend request to users/${targetId}`, err.code, err.message);
     }
@@ -368,9 +415,13 @@ function Roommates() {
       sendFriendRequest(key);
     } else {
       setPassedIds((prev) => [...prev, key]);
+      // TODO: record passes somewhere if you don't want to re-suggest them
     }
 
-    setProfiles((prev) => prev.filter((p) => (p.id ?? p.firestoreId) !== key));
+    // Remove the swiped card from the stack
+    setProfiles((prev) =>
+      prev.filter((p) => (p.id ?? p.firestoreId) !== key)
+    );
   };
 
   if (loading) {
@@ -386,23 +437,30 @@ function Roommates() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          paddingTop: 20,
+          paddingTop: 44,
+          paddingBottom: 44,
+          minHeight: "100vh",
+          background: "#f9fafb",
         }}
       >
-        {fetching && <p>Loading suggestions...</p>}
-        {!fetching && error && <p style={{ color: "#ef4444" }}>{error}</p>}
+        {fetching && <p style={{ color: "#6b7280", fontSize: 15 }}>Loading suggestions...</p>}
+        {!fetching && error && (
+          <p style={{ color: "#ef4444", fontWeight: 600 }}>{error}</p>
+        )}
         {!fetching && !error && profiles.length === 0 && (
-          <p>No more suggestions right now.</p>
+          <p style={{ color: "#6b7280", fontSize: 15 }}>No more suggestions right now.</p>
         )}
 
         <div
           style={{
             position: "relative",
             width: "100%",
-            maxWidth: 360,
-            height: 560,
+            maxWidth: 440,
+            height: 680,
           }}
         >
+          {/* Render newest-on-top: reverse so the first profile ends up
+              last in the DOM / visually on top of the stack */}
           {profiles
             .slice(0, 3)
             .reverse()
@@ -417,7 +475,7 @@ function Roommates() {
         </div>
 
         {!fetching && profiles.length > 0 && (
-          <p style={{ marginTop: 16, color: "#888", fontSize: 14 }}>
+          <p style={{ marginTop: 28, color: "#9ca3af", fontSize: 14 }}>
             Swipe left to skip, right to send a friend request
           </p>
         )}

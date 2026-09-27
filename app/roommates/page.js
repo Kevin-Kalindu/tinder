@@ -68,10 +68,28 @@ function RoommateCard({ user, onSwipe, isTop }) {
   };
 
   // Programmatic swipe, used by the Pass / Like buttons
-  const triggerSwipe = (direction) => {
+//   const triggerSwipe = (direction) => {
+//     if (exiting) return;
+//     setOffset({ x: direction === "right" ? 400 : -400, y: 0 });
+//     commitSwipe(direction);
+//   };
+// Programmatic swipe, used by the Pass / Like buttons
+const triggerSwipe = (direction) => {
     if (exiting) return;
-    setOffset({ x: direction === "right" ? 400 : -400, y: 0 });
-    commitSwipe(direction);
+  
+    const flyX = direction === "right" ? 400 : -400;
+  
+    // Phase 1: move the card out to the same offset a real drag would reach,
+    // so the LIKE/NOPE stamp and tilt appear exactly like mid-swipe.
+    setOffset({ x: flyX, y: 0 });
+  
+    // Phase 2: let that frame paint, then commit the exit — same as
+    // releasing a drag past the threshold.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        commitSwipe(direction);
+      });
+    });
   };
 
   let transform = `translate(${offset.x}px, ${offset.y}px) rotate(${
@@ -103,11 +121,11 @@ function RoommateCard({ user, onSwipe, isTop }) {
         inset: 0,
         margin: "0 auto",
         width: "100%",
-        maxWidth: 360,
-        height: 560,
-        borderRadius: 20,
+        maxWidth: 440,
+        height: 680,
+        borderRadius: 28,
         background: "#fff",
-        boxShadow: "0 12px 30px rgba(0,0,0,0.18)",
+        boxShadow: "0 24px 60px rgba(0,0,0,0.16), 0 4px 14px rgba(0,0,0,0.08)",
         overflow: "hidden",
         touchAction: "none",
         cursor: isTop ? (dragging ? "grabbing" : "grab") : "default",
@@ -117,21 +135,22 @@ function RoommateCard({ user, onSwipe, isTop }) {
         display: "flex",
         flexDirection: "column",
         userSelect: "none",
+        border: "1px solid rgba(0,0,0,0.04)",
       }}
     >
       {/* LIKE / NOPE stamps */}
       <div
         style={{
           position: "absolute",
-          top: 24,
-          left: 20,
-          padding: "6px 14px",
-          border: "3px solid #22c55e",
-          borderRadius: 8,
+          top: 32,
+          left: 28,
+          padding: "8px 18px",
+          border: "4px solid #22c55e",
+          borderRadius: 10,
           color: "#22c55e",
           fontWeight: 800,
-          fontSize: 22,
-          letterSpacing: 1,
+          fontSize: 28,
+          letterSpacing: 1.5,
           transform: "rotate(-14deg)",
           opacity: likeOpacity,
           zIndex: 2,
@@ -142,15 +161,15 @@ function RoommateCard({ user, onSwipe, isTop }) {
       <div
         style={{
           position: "absolute",
-          top: 24,
-          right: 20,
-          padding: "6px 14px",
-          border: "3px solid #ef4444",
-          borderRadius: 8,
+          top: 32,
+          right: 28,
+          padding: "8px 18px",
+          border: "4px solid #ef4444",
+          borderRadius: 10,
           color: "#ef4444",
           fontWeight: 800,
-          fontSize: 22,
-          letterSpacing: 1,
+          fontSize: 28,
+          letterSpacing: 1.5,
           transform: "rotate(14deg)",
           opacity: nopeOpacity,
           zIndex: 2,
@@ -162,7 +181,7 @@ function RoommateCard({ user, onSwipe, isTop }) {
       {/* Photo */}
       <div
         style={{
-          height: 260,
+          height: 340,
           flexShrink: 0,
           background: user.picture
             ? `center / cover no-repeat url(${user.picture})`
@@ -174,24 +193,24 @@ function RoommateCard({ user, onSwipe, isTop }) {
         <div
           style={{
             width: "100%",
-            padding: "40px 18px 14px",
+            padding: "56px 24px 20px",
             background:
-              "linear-gradient(to top, rgba(0,0,0,0.65), rgba(0,0,0,0))",
+              "linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0))",
             color: "#fff",
           }}
         >
-          <div style={{ fontSize: 22, fontWeight: 700 }}>
+          <div style={{ fontSize: 30, fontWeight: 800, letterSpacing: "-0.01em" }}>
             {user.name}
             {user.age ? `, ${user.age}` : ""}
           </div>
           {user.program && (
-            <div style={{ fontSize: 14, opacity: 0.9 }}>{user.program}</div>
+            <div style={{ fontSize: 16, opacity: 0.92, marginTop: 4 }}>{user.program}</div>
           )}
         </div>
       </div>
 
       {/* Details, scrollable if content is long */}
-      <div style={{ padding: 16, overflowY: "auto", flex: 1 }}>
+      <div style={{ padding: "22px 24px", overflowY: "auto", flex: 1 }}>
         {user.budget != null && (
           <p style={row}>
             <strong>Budget:</strong> ${user.budget}
@@ -235,10 +254,10 @@ function RoommateCard({ user, onSwipe, isTop }) {
         )}
         {user.description && (
           <>
-            <p style={{ ...row, marginTop: 10 }}>
-              <strong>About:</strong>
+            <p style={{ ...row, marginTop: 14, fontSize: 13, textTransform: "uppercase", letterSpacing: "0.05em", color: "#9ca3af" }}>
+              About
             </p>
-            <p style={{ margin: 0, color: "#374151" }}>{user.description}</p>
+            <p style={{ margin: 0, color: "#374151", lineHeight: 1.6, fontSize: 15 }}>{user.description}</p>
           </>
         )}
       </div>
@@ -249,11 +268,11 @@ function RoommateCard({ user, onSwipe, isTop }) {
           style={{
             display: "flex",
             justifyContent: "center",
-            gap: 24,
-            padding: "12px 0 18px",
+            gap: 32,
+            padding: "18px 0 26px",
           }}
         >
-          <button
+          {/* <button
             onClick={() => triggerSwipe("left")}
             aria-label="Pass"
             style={circleButton("#ef4444")}
@@ -266,29 +285,30 @@ function RoommateCard({ user, onSwipe, isTop }) {
             style={circleButton("#22c55e")}
           >
             ♥
-          </button>
+          </button> */}
         </div>
       )}
     </div>
   );
 }
 
-const row = { margin: "6px 0", fontSize: 14, color: "#111827" };
+const row = { margin: "8px 0", fontSize: 15, color: "#111827", lineHeight: 1.5 };
 
 function circleButton(color) {
   return {
-    width: 56,
-    height: 56,
+    width: 68,
+    height: 68,
     borderRadius: "50%",
-    border: `2px solid ${color}`,
+    border: `2.5px solid ${color}`,
     background: "#fff",
     color,
-    fontSize: 22,
+    fontSize: 26,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     cursor: "pointer",
-    boxShadow: "0 4px 10px rgba(0,0,0,0.12)",
+    boxShadow: "0 8px 20px rgba(0,0,0,0.14)",
+    transition: "transform 0.15s ease, box-shadow 0.15s ease",
   };
 }
 
@@ -409,6 +429,8 @@ function Roommates() {
   }
 
   return (
+    <div>
+    {fetching && <Loader/>}
     <div style={{ display: "flex" }}>
       <Sidebar />
       <main
@@ -417,22 +439,25 @@ function Roommates() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          paddingTop: 20,
+          paddingTop: 44,
+          paddingBottom: 44,
+          minHeight: "100vh",
+          background: "#f9fafb",
         }}
       >
-
-        {fetching && <p>Loading suggestions...</p>}
-        {!fetching && error && <p style={{ color: "#ef4444" }}>{error}</p>}
+        {!fetching && error && (
+          <p style={{ color: "#ef4444", fontWeight: 600 }}>{error}</p>
+        )}
         {!fetching && !error && profiles.length === 0 && (
-          <p>No more suggestions right now.</p>
+          <p style={{ color: "#6b7280", fontSize: 15 }}>No more suggestions right now.</p>
         )}
 
         <div
           style={{
             position: "relative",
             width: "100%",
-            maxWidth: 360,
-            height: 560,
+            maxWidth: 440,
+            height: 680,
           }}
         >
           {/* Render newest-on-top: reverse so the first profile ends up
@@ -451,11 +476,12 @@ function Roommates() {
         </div>
 
         {!fetching && profiles.length > 0 && (
-          <p style={{ marginTop: 16, color: "#888", fontSize: 14 }}>
+          <p style={{ marginTop: 28, color: "#9ca3af", fontSize: 14 }}>
             Swipe left to skip, right to send a friend request
           </p>
         )}
       </main>
+    </div>
     </div>
   );
 }
