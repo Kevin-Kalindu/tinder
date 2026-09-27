@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   collection,
   getDocs,
@@ -27,6 +28,7 @@ function RoommateCard({ user, onSwipe, isTop }) {
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
   const [exiting, setExiting] = useState(null); // "left" | "right" | null
+  const router = useRouter();
 
   const handlePointerDown = (e) => {
     if (!isTop || exiting) return;
@@ -68,21 +70,15 @@ function RoommateCard({ user, onSwipe, isTop }) {
   };
 
   // Programmatic swipe, used by the Pass / Like buttons
-//   const triggerSwipe = (direction) => {
-//     if (exiting) return;
-//     setOffset({ x: direction === "right" ? 400 : -400, y: 0 });
-//     commitSwipe(direction);
-//   };
-// Programmatic swipe, used by the Pass / Like buttons
-const triggerSwipe = (direction) => {
+  const triggerSwipe = (direction) => {
     if (exiting) return;
-  
+
     const flyX = direction === "right" ? 400 : -400;
-  
+
     // Phase 1: move the card out to the same offset a real drag would reach,
     // so the LIKE/NOPE stamp and tilt appear exactly like mid-swipe.
     setOffset({ x: flyX, y: 0 });
-  
+
     // Phase 2: let that frame paint, then commit the exit — same as
     // releasing a drag past the threshold.
     requestAnimationFrame(() => {
@@ -90,6 +86,14 @@ const triggerSwipe = (direction) => {
         commitSwipe(direction);
       });
     });
+  };
+
+  // Clicking the name routes to that person's full profile, without
+  // triggering a drag/swipe on the card underneath it.
+  const handleNameClick = (e) => {
+    e.stopPropagation();
+    const targetId = user.id ?? user.firestoreId;
+    if (targetId) router.push(`/roommates/${targetId}`);
   };
 
   let transform = `translate(${offset.x}px, ${offset.y}px) rotate(${
@@ -183,6 +187,7 @@ const triggerSwipe = (direction) => {
         style={{
           height: 340,
           flexShrink: 0,
+          position: "relative",
           background: user.picture
             ? `center / cover no-repeat url(${user.picture})`
             : "#e5e7eb",
@@ -190,6 +195,29 @@ const triggerSwipe = (direction) => {
           alignItems: "flex-end",
         }}
       >
+        <button
+          onClick={handleNameClick}
+          onPointerDown={(e) => e.stopPropagation()}
+          style={{
+            position: "absolute",
+            top: 16,
+            right: 16,
+            zIndex: 3,
+            padding: "8px 16px",
+            borderRadius: 999,
+            border: "none",
+            background: "rgba(255,255,255,0.85)",
+            backdropFilter: "blur(6px)",
+            color: "#111111",
+            fontSize: 13,
+            fontWeight: 700,
+            cursor: "pointer",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+          }}
+        >
+          View Profile
+        </button>
+
         <div
           style={{
             width: "100%",
@@ -199,7 +227,16 @@ const triggerSwipe = (direction) => {
             color: "#fff",
           }}
         >
-          <div style={{ fontSize: 30, fontWeight: 800, letterSpacing: "-0.01em" }}>
+          <div
+            onClick={handleNameClick}
+            style={{
+              fontSize: 30,
+              fontWeight: 800,
+              letterSpacing: "-0.01em",
+              cursor: "pointer",
+              display: "inline-block",
+            }}
+          >
             {user.name}
             {user.age ? `, ${user.age}` : ""}
           </div>

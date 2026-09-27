@@ -84,9 +84,7 @@ export default function Me() {
   const [requestsData, setRequestsData] = useState([]);
   const [relationsLoading, setRelationsLoading] = useState(false);
 
-  // Load this user's existing profile, if one exists, by matching email —
-  // the only link we keep back to the signed-in Firebase Auth account.
-  // (Email is never editable through the form below, so it stays stable.)
+  // Load this user's existing profile, if one exists, by matching authUid
   useEffect(() => {
     if (!userAgent) return;
 
@@ -98,7 +96,7 @@ export default function Me() {
       if (!snap.empty) {
         const existingDoc = snap.docs[0];
         const data = existingDoc.data();
-        setDocId(existingDoc.id);
+        setDocId(data.id || existingDoc.id);
         setProfile({
           ...emptyProfile,
           ...data,
@@ -347,7 +345,7 @@ export default function Me() {
                   label="Sleep schedule"
                   value={profile.sleep_schedule}
                   editing
-                  options={["early", "normal", "night"]}
+                  options={["early", "late", "varies"]}
                   onChange={(v) => handleChange("sleep_schedule", v)}
                 />
                 <SelectField
