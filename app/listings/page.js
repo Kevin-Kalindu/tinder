@@ -355,7 +355,6 @@ function MyHouse() {
           fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif",
         }}
       >
-        <h1 style={{ margin: "0 0 20px", color: "#111111" }}>Listings</h1>
 
         {fetching && <p style={{ color: "#888888" }}>Loading listings...</p>}
         {!fetching && error && <p style={{ color: "#ef4444" }}>{error}</p>}

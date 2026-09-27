@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRequireAuth } from "@/lib/authGuard";
+import styles from "@/styles/site.module.css";
 
 const navItems = [
   { label: "Listings", href: "/listings", icon: ListingsIcon },
@@ -19,7 +20,8 @@ export default function Sidebar() {
 
   return (
     <aside className="sidebar">
-      <div className="brand">🏠</div>
+
+      <div className="spacer" />
 
       <nav className="nav">
         {navItems.map(({ label, href, icon: Icon }) => {
@@ -92,7 +94,7 @@ export default function Sidebar() {
         .nav {
           display: flex;
           flex-direction: column;
-          gap: 10px;
+          gap: 40px;
           width: 100%;
           align-items: center;
         }
