@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRequireAuth } from "@/lib/authGuard";
-import styles from "@/styles/site.module.css";
 
 const navItems = [
   { label: "Listings", href: "/listings", icon: ListingsIcon },
@@ -20,7 +19,6 @@ export default function Sidebar() {
 
   return (
     <aside className="sidebar">
-
       <div className="spacer" />
 
       <nav className="nav">
@@ -57,13 +55,13 @@ export default function Sidebar() {
             position: sticky;
             top: 0;
             align-self: flex-start;
-            background: #14102b;
+            background: #241914;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 20px 0;
             gap: 32px;
-            font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
             overflow: hidden;
         }
 
@@ -80,11 +78,11 @@ export default function Sidebar() {
           height: 26px;
           border-radius: 50%;
           object-fit: cover;
-          border: 2px solid rgba(255, 255, 255, 0.7);
+          border: 2px solid rgba(251, 246, 238, 0.5);
         }
 
         .nav-btn.active .avatar {
-          border-color: #ff6a1f;
+          border-color: #f36a2d;
         }
 
         .brand {
@@ -107,7 +105,7 @@ export default function Sidebar() {
           width: 72px;
           padding: 10px 4px;
           border-radius: 14px;
-          color: rgba(255, 255, 255, 0.85);
+          color: rgba(251, 246, 238, 0.7);
           text-decoration: none;
           font-size: 11px;
           font-weight: 600;
@@ -115,13 +113,14 @@ export default function Sidebar() {
         }
 
         .nav-btn:hover {
-          background: rgba(255, 255, 255, 0.15);
+          background: rgba(255, 255, 255, 0.08);
+          color: rgba(251, 246, 238, 0.95);
           transform: translateY(-1px);
         }
 
         .nav-btn.active {
-          background: rgba(255, 255, 255, 0.95);
-          color: #ff6a1f;
+          background: #ffe0c2;
+          color: #f36a2d;
         }
 
         .nav-btn svg {

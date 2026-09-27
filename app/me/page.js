@@ -274,41 +274,151 @@ export default function Me() {
   return (
     <div className="layout">
       <Sidebar />
-
+  
       <main className="content">
-        <div className="profile-box">
-          <div className="header">
-            <div className="identity">
-              <img
-                src={profile.picture || "https://via.placeholder.com/56"}
-                alt={profile.name || "Profile picture"}
-                className="profile-pic"
-              />
-              <div className="identity-text">
-                <p className="name">{profile.name || "Unnamed"}</p>
-                <p className="email">{profile.email || "—"}</p>
-              </div>
+        <div className="shell">
+  
+          {/* Page header */}
+          <div className="topbar">
+            <div className="title-wrap">
+              <small>Profile</small>
+              <h1>Me</h1>
             </div>
+  
             {!isEditing && (
-              <button className="edit-btn" onClick={() => setIsEditing(true)}>
-                Edit
+              <button
+                className="edit-top"
+                onClick={() => setIsEditing(true)}
+              >
+                Edit profile
               </button>
             )}
           </div>
-
+  
+          {/* Profile hero */}
+          <section className="hero-card">
+            <article className="profile-card">
+              <img
+                src={
+                  profile.picture ||
+                  "https://via.placeholder.com/110"
+                }
+                alt={profile.name || "Profile picture"}
+                className="avatar"
+              />
+  
+              <div className="profile-copy">
+                <h2>{profile.name || "Unnamed"}</h2>
+  
+                <div className="email">
+                  {profile.email || "—"}
+                </div>
+  
+                <div className="chips">
+                  {profile.age && (
+                    <span className="chip">
+                      {profile.age} years old
+                    </span>
+                  )}
+  
+                  {profile.program && (
+                    <span className="chip">
+                      {profile.program}
+                    </span>
+                  )}
+  
+                  {profile.looking && (
+                    <span className="chip looking-chip">
+                      Looking for roommate
+                    </span>
+                  )}
+                </div>
+              </div>
+            </article>
+  
+            {/* Profile metrics */}
+            <aside className="side-card">
+              <div className="metric">
+                <div className="n">
+                  {friendsData.length}
+                </div>
+                <span>Connected friends</span>
+              </div>
+  
+              <div className="metric">
+                <div className="n">
+                  {requestsData.length}
+                </div>
+                <span>Pending requests</span>
+              </div>
+  
+              <div className="metric wide">
+                <div className="n">
+                  {profile.looking ? "Ready to match" : "Not looking"}
+                </div>
+  
+                <span>
+                  {profile.looking
+                    ? "Your roommate profile is visible to suggested matches."
+                    : "Turn on roommate search when you're ready."}
+                </span>
+              </div>
+            </aside>
+          </section>
+  
+          {/* Edit mode */}
           {isEditing && (
-            <>
+            <section className="panel edit-panel">
+  
+              <div className="panel-head">
+                <div>
+                  <h3>Edit profile</h3>
+                  <span>Keep your profile information current</span>
+                </div>
+  
+                <button
+                  className="close-edit"
+                  onClick={() => {
+                    setIsEditing(false);
+                    setMissingFields([]);
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+  
               {missingFields.length > 0 && (
                 <div className="error-box">
-                  Please fill out: {missingFields.join(", ")}
+                  <strong>Please fill out:</strong>{" "}
+                  {missingFields.join(", ")}
                 </div>
               )}
-
+  
               <div className="fields">
-                <Field label="Name" value={profile.name} editing onChange={(v) => handleChange("name", v)} />
-                <Field label="Age" value={profile.age} editing onChange={(v) => handleChange("age", v)} type="number" />
-                <Field label="Date of birth" value={profile.dob} editing onChange={(v) => handleChange("dob", v)} type="date" />
-
+  
+                <Field
+                  label="Name"
+                  value={profile.name}
+                  editing
+                  onChange={(v) => handleChange("name", v)}
+                />
+  
+                <Field
+                  label="Age"
+                  value={profile.age}
+                  editing
+                  onChange={(v) => handleChange("age", v)}
+                  type="number"
+                />
+  
+                <Field
+                  label="Date of birth"
+                  value={profile.dob}
+                  editing
+                  onChange={(v) => handleChange("dob", v)}
+                  type="date"
+                />
+  
                 <SelectField
                   label="Gender"
                   value={profile.gender}
@@ -316,411 +426,1112 @@ export default function Me() {
                   options={["Male", "Female", "Other"]}
                   onChange={(v) => handleChange("gender", v)}
                 />
-
-                <Field label="Program" value={profile.program} editing onChange={(v) => handleChange("program", v)} />
-                <Field label="Budget" value={profile.budget} editing onChange={(v) => handleChange("budget", v)} type="number" />
-                <Field label="Description" value={profile.description} editing onChange={(v) => handleChange("description", v)} multiline />
+  
+                <Field
+                  label="Program"
+                  value={profile.program}
+                  editing
+                  onChange={(v) => handleChange("program", v)}
+                />
+  
+                <Field
+                  label="Budget"
+                  value={profile.budget}
+                  editing
+                  onChange={(v) => handleChange("budget", v)}
+                  type="number"
+                />
+  
+                <Field
+                  label="Description"
+                  value={profile.description}
+                  editing
+                  onChange={(v) => handleChange("description", v)}
+                  multiline
+                />
+  
                 <Field
                   label="Interests (comma-separated)"
                   value={profile.interests}
                   editing
                   onChange={(v) => handleChange("interests", v)}
                 />
-
+  
                 <SelectField
                   label="Cleanliness"
                   value={profile.cleanliness}
                   editing
                   options={["Low", "Medium", "High"]}
-                  onChange={(v) => handleChange("cleanliness", v)}
+                  onChange={(v) =>
+                    handleChange("cleanliness", v)
+                  }
                 />
+  
                 <SelectField
                   label="Noise level"
                   value={profile.noise_level}
                   editing
                   options={["Low", "Medium", "High"]}
-                  onChange={(v) => handleChange("noise_level", v)}
+                  onChange={(v) =>
+                    handleChange("noise_level", v)
+                  }
                 />
+  
                 <SelectField
                   label="Sleep schedule"
                   value={profile.sleep_schedule}
                   editing
                   options={["early", "late", "varies"]}
-                  onChange={(v) => handleChange("sleep_schedule", v)}
+                  onChange={(v) =>
+                    handleChange("sleep_schedule", v)
+                  }
                 />
+  
                 <SelectField
                   label="Guests frequency"
                   value={profile.guests_frequency}
                   editing
                   options={["rarely", "sometimes", "often"]}
-                  onChange={(v) => handleChange("guests_frequency", v)}
+                  onChange={(v) =>
+                    handleChange("guests_frequency", v)
+                  }
                 />
-
-                <Field label="Pet" value={profile.pet} editing onChange={(v) => handleChange("pet", v)} />
-                <Field label="Picture URL" value={profile.picture} editing onChange={(v) => handleChange("picture", v)} />
-
-                <ToggleField label="Drinking" value={profile.drinking} editing onChange={(v) => handleChange("drinking", v)} />
-                <ToggleField label="Smoking" value={profile.smoking} editing onChange={(v) => handleChange("smoking", v)} />
-                <ToggleField label="Has a place" value={profile.has_place} editing onChange={(v) => handleChange("has_place", v)} />
+  
+                <Field
+                  label="Pet"
+                  value={profile.pet}
+                  editing
+                  onChange={(v) => handleChange("pet", v)}
+                />
+  
+                <Field
+                  label="Picture URL"
+                  value={profile.picture}
+                  editing
+                  onChange={(v) => handleChange("picture", v)}
+                />
+  
+                <ToggleField
+                  label="Drinking"
+                  value={profile.drinking}
+                  editing
+                  onChange={(v) =>
+                    handleChange("drinking", v)
+                  }
+                />
+  
+                <ToggleField
+                  label="Smoking"
+                  value={profile.smoking}
+                  editing
+                  onChange={(v) =>
+                    handleChange("smoking", v)
+                  }
+                />
+  
+                <ToggleField
+                  label="Has a place"
+                  value={profile.has_place}
+                  editing
+                  onChange={(v) =>
+                    handleChange("has_place", v)
+                  }
+                />
+  
               </div>
-
-              <button className="save-btn" onClick={handleSave} disabled={saving}>
-                {saving ? "Saving…" : "Save"}
+  
+              <button
+                className="save-btn"
+                onClick={handleSave}
+                disabled={saving}
+              >
+                {saving ? "Saving…" : "Save changes"}
               </button>
-            </>
+            </section>
           )}
-
+  
+          {/* Personal details */}
+          {!isEditing && (
+            <section className="content-grid">
+  
+              <article className="panel">
+                <div className="panel-head">
+                  <h3>Personal details</h3>
+                  <span>Keep your profile current</span>
+                </div>
+  
+                <div className="details">
+  
+                  <div className="detail">
+                    <small>Name</small>
+                    <strong>{profile.name || "—"}</strong>
+                  </div>
+  
+                  <div className="detail">
+                    <small>Age</small>
+                    <strong>{profile.age || "—"}</strong>
+                  </div>
+  
+                  <div className="detail">
+                    <small>Date of birth</small>
+                    <strong>{profile.dob || "—"}</strong>
+                  </div>
+  
+                  <div className="detail">
+                    <small>Gender</small>
+                    <strong>{profile.gender || "—"}</strong>
+                  </div>
+  
+                  <div className="detail">
+                    <small>Program</small>
+                    <strong>{profile.program || "—"}</strong>
+                  </div>
+  
+                  <div className="detail">
+                    <small>Budget</small>
+                    <strong>
+                      {profile.budget
+                        ? `$${profile.budget}`
+                        : "—"}
+                    </strong>
+                  </div>
+  
+                  <div className="detail">
+                    <small>Cleanliness</small>
+                    <strong>
+                      {profile.cleanliness || "—"}
+                    </strong>
+                  </div>
+  
+                  <div className="detail">
+                    <small>Noise level</small>
+                    <strong>
+                      {profile.noise_level || "—"}
+                    </strong>
+                  </div>
+  
+                  <div className="detail">
+                    <small>Sleep schedule</small>
+                    <strong>
+                      {profile.sleep_schedule || "—"}
+                    </strong>
+                  </div>
+  
+                  <div className="detail">
+                    <small>Guests</small>
+                    <strong>
+                      {profile.guests_frequency || "—"}
+                    </strong>
+                  </div>
+  
+                  <div className="detail">
+                    <small>Pet</small>
+                    <strong>{profile.pet || "—"}</strong>
+                  </div>
+  
+                  <div className="detail">
+                    <small>Drinking</small>
+                    <strong>
+                      {profile.drinking ? "Yes" : "No"}
+                    </strong>
+                  </div>
+  
+                  <div className="detail">
+                    <small>Smoking</small>
+                    <strong>
+                      {profile.smoking ? "Yes" : "No"}
+                    </strong>
+                  </div>
+  
+                  <div className="detail">
+                    <small>Has a place</small>
+                    <strong>
+                      {profile.has_place ? "Yes" : "No"}
+                    </strong>
+                  </div>
+  
+                  <div className="detail full">
+                    <small>Interests</small>
+                    <div className="bio-text">
+                      {Array.isArray(profile.interests)
+                        ? profile.interests.join(", ")
+                        : profile.interests || "—"}
+                    </div>
+                  </div>
+  
+                  <div className="detail full">
+                    <small>Description</small>
+                    <div className="bio-text">
+                      {profile.description || "—"}
+                    </div>
+                  </div>
+  
+                </div>
+              </article>
+  
+              {/* Connections */}
+              <aside className="connections-stack">
+  
+                <section className="panel connection-tab">
+                  <div className="panel-head">
+                    <h3>Friends</h3>
+                    <span>
+                      {friendsData.length} connected
+                    </span>
+                  </div>
+  
+                  {relationsLoading ? (
+                    <p className="empty-text">
+                      Loading…
+                    </p>
+                  ) : friendsData.length === 0 ? (
+                    <p className="empty-text">
+                      No friends yet
+                    </p>
+                  ) : (
+                    <ul className="friend-list">
+                      {friendsData.map((friend) => (
+                        <li key={friend.id}>
+                          <Link
+                            href={`/chat/${friend.id}`}
+                            className="friend"
+                          >
+                            <img
+                              src={
+                                friend.picture ||
+                                "https://via.placeholder.com/40"
+                              }
+                              alt={
+                                friend.name || "Friend"
+                              }
+                              className="friend-avatar"
+                            />
+  
+                            <div className="friend-copy">
+                              <strong>
+                                {friend.name ||
+                                  "Unnamed"}
+                              </strong>
+  
+                              <span>
+                                Friend
+                              </span>
+                            </div>
+  
+                            <span className="status">
+                              Connected
+                            </span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+  
+                <section className="panel connection-tab">
+                  <div className="panel-head">
+                    <h3>Requests</h3>
+                    <span>
+                      {requestsData.length} pending
+                    </span>
+                  </div>
+  
+                  {relationsLoading ? (
+                    <p className="empty-text">
+                      Loading…
+                    </p>
+                  ) : requestsData.length === 0 ? (
+                    <p className="empty-text">
+                      No requests
+                    </p>
+                  ) : (
+                    <ul className="friend-list">
+                      {requestsData.map((req) => (
+                        <li key={req.id}>
+  
+                          <div className="friend">
+                            <img
+                              src={
+                                req.picture ||
+                                "https://via.placeholder.com/40"
+                              }
+                              alt={
+                                req.name || "Request"
+                              }
+                              className="friend-avatar"
+                            />
+  
+                            <div className="friend-copy">
+                              <strong>
+                                {req.name ||
+                                  "Unnamed"}
+                              </strong>
+  
+                              <span>
+                                Roommate request
+                              </span>
+                            </div>
+  
+                            <span className="status request">
+                              Pending
+                            </span>
+                          </div>
+  
+                          <div className="request-actions">
+                            <button
+                              className="accept-btn"
+                              onClick={() =>
+                                handleAcceptRequest(
+                                  req.id
+                                )
+                              }
+                            >
+                              Accept
+                            </button>
+  
+                            <button
+                              className="reject-btn"
+                              onClick={() =>
+                                handleRejectRequest(
+                                  req.id
+                                )
+                              }
+                            >
+                              Reject
+                            </button>
+                          </div>
+  
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+  
+              </aside>
+            </section>
+          )}
+  
+          {/* Looking status */}
           <button
-            className={`looking-btn ${profile.looking ? "active" : ""}`}
+            className={`looking-btn ${
+              profile.looking ? "active" : ""
+            }`}
             onClick={handleToggleLooking}
           >
-            {profile.looking ? "✓ Looking for a roommate" : "Looking for a roommate"}
+            {profile.looking
+              ? "✓ Looking for a roommate"
+              : "Looking for a roommate"}
           </button>
-        </div>
-
-        <div className="relations-row">
-          <div className="relations-box">
-            <h2>Friends</h2>
-            {relationsLoading ? (
-              <p className="empty-text">Loading…</p>
-            ) : friendsData.length === 0 ? (
-              <p className="empty-text">No friends</p>
-            ) : (
-              <ul className="relations-list">
-                {friendsData.map((friend) => (
-                  <li key={friend.id}>
-                    <Link href={`/chat/${friend.id}`} className="relation-item">
-                      <img
-                        src={friend.picture || "https://via.placeholder.com/40"}
-                        alt={friend.name || "Friend"}
-                        className="relation-pic"
-                      />
-                      <span>{friend.name || "Unnamed"}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          <div className="relations-box">
-            <h2>Requests</h2>
-            {relationsLoading ? (
-              <p className="empty-text">Loading…</p>
-            ) : requestsData.length === 0 ? (
-              <p className="empty-text">No requests</p>
-            ) : (
-              <ul className="relations-list">
-                {requestsData.map((req) => (
-                  <li key={req.id}>
-                    <div className="relation-item">
-                      <img
-                        src={req.picture || "https://via.placeholder.com/40"}
-                        alt={req.name || "Request"}
-                        className="relation-pic"
-                      />
-                      <span>{req.name || "Unnamed"}</span>
-                    </div>
-                    <div className="request-actions">
-                      <button
-                        className="accept-btn"
-                        onClick={() => handleAcceptRequest(req.id)}
-                      >
-                        Accept
-                      </button>
-                      <button
-                        className="reject-btn"
-                        onClick={() => handleRejectRequest(req.id)}
-                      >
-                        Reject
-                      </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+  
         </div>
       </main>
-
-      <style>{`
-        .layout {
-          display: flex;
-          min-height: 100vh;
-          background: #ffffff;
+  
+      <style jsx>{`
+  
+        :global(*) {
+          box-sizing: border-box;
         }
-
+  
+        :global(html),
+        :global(body) {
+          margin: 0;
+          min-height: 100%;
+        }
+  
+        .layout {
+          min-height: 100vh;
+          display: flex;
+          background: #f6efe3;
+          color: #201b17;
+          font-family:
+            Inter,
+            ui-sans-serif,
+            -apple-system,
+            BlinkMacSystemFont,
+            "Segoe UI",
+            sans-serif;
+        }
+  
         .content {
           flex: 1;
-          max-width: 720px;
-          margin: 0 auto;
-          padding: 56px 40px 80px;
-          font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+          min-width: 0;
+          padding: 28px 34px 42px;
+          overflow: hidden;
+          position: relative;
         }
-
-        .profile-box {
-          border: 1px solid #dddddd;
-          border-radius: 12px;
-          padding: 24px;
-        }
-
-        .header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 16px;
-        }
-
-        .identity {
-          display: flex;
-          align-items: center;
-          gap: 14px;
-        }
-
-        .profile-pic {
-          width: 56px;
-          height: 56px;
+  
+        .content::before,
+        .content::after {
+          content: "";
+          position: absolute;
           border-radius: 50%;
-          object-fit: cover;
-          border: 1px solid #dddddd;
+          pointer-events: none;
+          opacity: .45;
         }
-
-        .identity-text {
+  
+        .content::before {
+          width: 340px;
+          height: 340px;
+          background: #f8d5bd;
+          right: -140px;
+          top: -150px;
+        }
+  
+        .content::after {
+          width: 260px;
+          height: 260px;
+          background: #eddac5;
+          left: 12%;
+          bottom: -120px;
+        }
+  
+        .shell {
+          position: relative;
+          z-index: 1;
+          max-width: 1240px;
+          margin: 0 auto;
+        }
+  
+        /* Header */
+  
+        .topbar {
           display: flex;
-          flex-direction: column;
-          gap: 2px;
+          justify-content: space-between;
+          align-items: center;
+          gap: 18px;
+          margin-bottom: 20px;
         }
-
-        .name {
-          font-size: 18px;
-          font-weight: 700;
-          color: #111111;
-          margin: 0;
-        }
-
-        .email {
-          font-size: 13px;
-          color: #777777;
-          margin: 0;
-        }
-
-        .edit-btn {
-          background: #ffffff;
-          border: 1px solid #111111;
-          color: #111111;
-          padding: 8px 20px;
-          border-radius: 8px;
-          font-weight: 600;
-          font-size: 13px;
-          cursor: pointer;
-          white-space: nowrap;
-        }
-
-        .edit-btn:hover {
-          background: #f5f5f5;
-        }
-
-        .error-box {
-          background: #f5f5f5;
-          border: 1px solid #999999;
-          color: #333333;
-          padding: 12px 16px;
-          border-radius: 8px;
-          font-size: 13px;
-          margin-top: 20px;
-        }
-
-        .fields {
-          display: flex;
-          flex-direction: column;
-          gap: 24px;
-          margin-top: 24px;
-        }
-
-        .field {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-
-        .field label {
-          font-size: 12px;
-          color: #777777;
+  
+        .title-wrap small {
           text-transform: uppercase;
-          letter-spacing: 0.05em;
+          letter-spacing: .12em;
+          color: #8a5b3c;
+          font-weight: 800;
+          font-size: .74rem;
         }
-
-        .field input,
-        .field select,
-        .field textarea {
-          background: #ffffff;
-          border: 1px solid #cccccc;
-          border-radius: 8px;
-          padding: 12px 14px;
-          color: #111111;
-          font-size: 15px;
-          outline: none;
-          font-family: inherit;
+  
+        .title-wrap h1 {
+          font-size: clamp(2.5rem, 5vw, 4.8rem);
+          line-height: .95;
+          letter-spacing: -.065em;
+          margin: 6px 0 0;
         }
-
-        .field input:focus,
-        .field select:focus,
-        .field textarea:focus {
-          border-color: #111111;
+  
+        .edit-top {
+          border: 1px solid #e7d8c7;
+          background: #fffaf2;
+          color: #201b17;
+          border-radius: 999px;
+          padding: 11px 16px;
+          font-weight: 700;
+          box-shadow: 0 8px 24px rgba(69,43,26,.05);
+          transition: .18s;
+          cursor: pointer;
         }
-
-        .toggle-btns {
+  
+        .edit-top:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 18px 55px rgba(67,42,24,.09);
+        }
+  
+        /* Hero */
+  
+        .hero-card {
+          display: grid;
+          grid-template-columns:
+            minmax(0, 1.1fr)
+            minmax(310px, .9fr);
+          gap: 16px;
+          margin-bottom: 16px;
+        }
+  
+        .profile-card,
+        .side-card,
+        .panel {
+          background: rgba(255,250,242,.94);
+          border: 1px solid rgba(111,77,53,.11);
+          border-radius: 28px;
+          box-shadow:
+            0 12px 40px rgba(67,42,24,.065);
+        }
+  
+        .profile-card {
+          padding: 26px;
           display: flex;
-          gap: 8px;
+          align-items: center;
+          gap: 22px;
+          min-height: 210px;
+          position: relative;
+          overflow: hidden;
         }
-
-        .toggle-btn {
-          padding: 8px 18px;
-          border-radius: 8px;
-          border: 1px solid #cccccc;
-          background: #ffffff;
-          color: #555555;
-          font-size: 13px;
-          font-weight: 600;
-          cursor: pointer;
+  
+        .profile-card::after {
+          content: "";
+          position: absolute;
+          width: 160px;
+          height: 160px;
+          border-radius: 50%;
+          background:
+            linear-gradient(
+              145deg,
+              #ffe0c8,
+              #ffd1af
+            );
+          right: -50px;
+          bottom: -60px;
         }
-
-        .toggle-btn.selected {
-          background: #111111;
-          border-color: #111111;
-          color: #ffffff;
+  
+        .avatar {
+          width: 110px;
+          height: 110px;
+          border-radius: 28px;
+          object-fit: cover;
+          background:
+            linear-gradient(
+              145deg,
+              #ff6b2c,
+              #ff8f4d
+            );
+          box-shadow:
+            0 18px 38px rgba(255,107,44,.22);
+          flex: 0 0 auto;
+          position: relative;
+          z-index: 1;
         }
-
-        .save-btn {
-          width: 100%;
-          margin-top: 24px;
-          padding: 14px;
-          border-radius: 8px;
-          border: none;
-          background: #111111;
-          color: #ffffff;
-          font-weight: 600;
-          font-size: 15px;
-          cursor: pointer;
-        }
-
-        .save-btn:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        .looking-btn {
-          width: 100%;
-          margin-top: 20px;
-          padding: 14px;
-          border-radius: 8px;
-          border: 1px solid #cccccc;
-          background: #ffffff;
-          color: #555555;
-          font-weight: 600;
-          font-size: 15px;
-          cursor: pointer;
-        }
-
-        .looking-btn.active {
-          background: #111111;
-          border-color: #111111;
-          color: #ffffff;
-        }
-
-        .relations-row {
-          display: flex;
-          gap: 20px;
-          margin-top: 28px;
-        }
-
-        .relations-box {
-          flex: 1;
-          border: 1px solid #dddddd;
-          border-radius: 12px;
-          padding: 20px;
+  
+        .profile-copy {
+          position: relative;
+          z-index: 1;
           min-width: 0;
         }
-
-        .relations-box h2 {
-          font-size: 15px;
-          font-weight: 700;
-          color: #111111;
-          margin: 0 0 16px;
+  
+        .profile-copy h2 {
+          font-size: 2rem;
+          letter-spacing: -.045em;
+          margin: 0 0 4px;
         }
-
-        .empty-text {
-          color: #999999;
-          font-size: 13px;
+  
+        .email {
+          color: #776f66;
+          font-size: .95rem;
+        }
+  
+        .chips {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-top: 16px;
+        }
+  
+        .chip {
+          padding: 8px 11px;
+          border-radius: 999px;
+          background: #f3e7da;
+          color: #6f5d4e;
+          font-size: .82rem;
+        }
+  
+        .looking-chip {
+          background: #edf1e8;
+          color: #60705a;
+        }
+  
+        /* Metrics */
+  
+        .side-card {
+          padding: 22px;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+        }
+  
+        .metric {
+          border: 1px solid #e7d8c7;
+          background: #fffdfa;
+          border-radius: 20px;
+          padding: 17px;
+          transition: .18s;
+        }
+  
+        .metric:hover {
+          transform: translateY(-3px);
+          border-color: #f4b083;
+          box-shadow:
+            0 12px 24px rgba(67,42,24,.06);
+        }
+  
+        .metric .n {
+          font-size: 1.9rem;
+          font-weight: 900;
+          letter-spacing: -.04em;
+        }
+  
+        .metric span {
+          display: block;
+          color: #776f66;
+          font-size: .82rem;
+          margin-top: 2px;
+        }
+  
+        .metric.wide {
+          grid-column: 1 / -1;
+          background: #201b17;
+          color: white;
+          border-color: #201b17;
+        }
+  
+        .metric.wide span {
+          color: #cfc2b6;
+        }
+  
+        /* Main content */
+  
+        .content-grid {
+          display: grid;
+          grid-template-columns:
+            minmax(0, 1.35fr)
+            minmax(300px, .65fr);
+          gap: 16px;
+        }
+  
+        .panel {
+          padding: 24px;
+        }
+  
+        .panel-head {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 18px;
+        }
+  
+        .panel-head h3 {
           margin: 0;
+          font-size: 1.35rem;
+          letter-spacing: -.035em;
         }
-
-        .relations-list {
+  
+        .panel-head span {
+          color: #776f66;
+          font-size: .84rem;
+        }
+  
+        /* Details */
+  
+        .details {
+          display: grid;
+          grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+          gap: 12px;
+        }
+  
+        .detail {
+          padding: 15px 16px;
+          border: 1px solid #e7d8c7;
+          border-radius: 17px;
+          background: #fffdfa;
+          transition: .18s;
+        }
+  
+        .detail:hover {
+          border-color: #f3b085;
+          transform: translateY(-2px);
+        }
+  
+        .detail small {
+          display: block;
+          color: #9a8d80;
+          text-transform: uppercase;
+          letter-spacing: .08em;
+          font-size: .69rem;
+          font-weight: 800;
+          margin-bottom: 4px;
+        }
+  
+        .detail strong {
+          font-size: .98rem;
+        }
+  
+        .detail.full {
+          grid-column: 1 / -1;
+        }
+  
+        .bio-text {
+          font-weight: 500;
+          line-height: 1.6;
+          color: #4d443d;
+        }
+  
+        /* Connections */
+  
+        .connections-stack {
+          display: grid;
+          gap: 16px;
+          align-content: start;
+        }
+  
+        .connection-tab {
+          position: relative;
+          overflow: hidden;
+        }
+  
+        .connection-tab::before {
+          content: "";
+          position: absolute;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          width: 5px;
+          background:
+            linear-gradient(
+              #ff6b2c,
+              #ff8f4d
+            );
+        }
+  
+        .friend-list {
+          display: grid;
+          gap: 10px;
           list-style: none;
           margin: 0;
           padding: 0;
-          display: flex;
-          flex-direction: column;
-          gap: 14px;
         }
-
-        .relation-item {
+  
+        .friend {
           display: flex;
           align-items: center;
-          gap: 10px;
+          gap: 11px;
+          padding: 11px;
+          border-radius: 16px;
+          border: 1px solid #e7d8c7;
+          background: #fffdfa;
+          transition: .18s;
           text-decoration: none;
-          color: #111111;
+          color: inherit;
         }
-
-        .relation-pic {
+  
+        .friend:hover {
+          transform: translateX(4px);
+          border-color: #f1ad80;
+        }
+  
+        .friend-avatar {
           width: 40px;
           height: 40px;
           border-radius: 50%;
           object-fit: cover;
-          border: 1px solid #dddddd;
+          background: #ffd6ba;
+          color: #6d4128;
           flex-shrink: 0;
         }
-
-        .relation-item span {
-          font-size: 14px;
-          font-weight: 600;
+  
+        .friend-copy {
+          min-width: 0;
+          flex: 1;
+        }
+  
+        .friend-copy strong {
+          display: block;
+          font-size: .92rem;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
         }
-
-        .relations-list li {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
+  
+        .friend-copy span {
+          font-size: .78rem;
+          color: #776f66;
         }
-
+  
+        .status {
+          font-size: .72rem;
+          padding: 6px 8px;
+          border-radius: 999px;
+          background: #edf1e8;
+          color: #60705a;
+          white-space: nowrap;
+        }
+  
+        .status.request {
+          background: #fff7f0;
+          color: #9b5c33;
+        }
+  
+        .empty-text {
+          color: #9a8d80;
+          font-size: .84rem;
+          margin: 0;
+        }
+  
+        /* Request buttons */
+  
         .request-actions {
           display: flex;
           gap: 8px;
+          margin-top: 8px;
         }
-
+  
         .accept-btn,
         .reject-btn {
           flex: 1;
-          padding: 6px 0;
-          border-radius: 6px;
-          font-size: 12px;
-          font-weight: 600;
+          padding: 9px 12px;
+          border-radius: 10px;
+          font-size: .78rem;
+          font-weight: 700;
+          cursor: pointer;
+          transition: .18s;
+        }
+  
+        .accept-btn {
+          background: #ff6b2c;
+          color: white;
+          border: 1px solid #ff6b2c;
+        }
+  
+        .accept-btn:hover {
+          background: #ff8f4d;
+          border-color: #ff8f4d;
+          transform: translateY(-1px);
+        }
+  
+        .reject-btn {
+          background: #fffdfa;
+          color: #6f6155;
+          border: 1px solid #e7d8c7;
+        }
+  
+        .reject-btn:hover {
+          border-color: #f1ad80;
+          transform: translateY(-1px);
+        }
+  
+        /* Looking button */
+  
+        .looking-btn {
+          width: 100%;
+          margin-top: 16px;
+          border: 0;
+          border-radius: 16px;
+          padding: 14px;
+          background: #fffaf2;
+          color: #6f6155;
+          border: 1px solid #e7d8c7;
+          font-weight: 800;
+          cursor: pointer;
+          transition: .18s;
+        }
+  
+        .looking-btn:hover {
+          transform: translateY(-2px);
+          border-color: #f3b085;
+        }
+  
+        .looking-btn.active {
+          background: #201b17;
+          border-color: #201b17;
+          color: white;
+        }
+  
+        /* Edit panel */
+  
+        .edit-panel {
+          margin-bottom: 16px;
+        }
+  
+        .close-edit {
+          border: 1px solid #e7d8c7;
+          background: #fffdfa;
+          color: #6f6155;
+          border-radius: 999px;
+          padding: 8px 13px;
+          font-weight: 700;
           cursor: pointer;
         }
-
-        .accept-btn {
-          background: #111111;
-          color: #ffffff;
-          border: 1px solid #111111;
+  
+        .error-box {
+          background: #fff7f0;
+          border: 1px solid #f1c09f;
+          color: #8d4f2e;
+          padding: 13px 16px;
+          border-radius: 14px;
+          font-size: .84rem;
+          margin-bottom: 18px;
         }
-
-        .reject-btn {
-          background: #ffffff;
-          color: #555555;
-          border: 1px solid #cccccc;
+  
+        .fields {
+          display: grid;
+          grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+          gap: 14px;
         }
+  
+        .field {
+          display: flex;
+          flex-direction: column;
+          gap: 7px;
+        }
+  
+        .field:nth-child(7),
+        .field:nth-child(8) {
+          grid-column: 1 / -1;
+        }
+  
+        .field label {
+          font-size: .69rem;
+          color: #9a8d80;
+          text-transform: uppercase;
+          letter-spacing: .08em;
+          font-weight: 800;
+        }
+  
+        .field input,
+        .field select,
+        .field textarea {
+          width: 100%;
+          margin: 0;
+          border: 1px solid #e7d8c7;
+          background: #fffdfa;
+          border-radius: 14px;
+          padding: 12px 13px;
+          outline: none;
+          color: #201b17;
+          font: inherit;
+          transition: .18s;
+        }
+  
+        .field input:focus,
+        .field select:focus,
+        .field textarea:focus {
+          border-color: #ff6b2c;
+          box-shadow:
+            0 0 0 3px rgba(255,107,44,.08);
+        }
+  
+        .field textarea {
+          min-height: 110px;
+          resize: vertical;
+        }
+  
+        .toggle-btns {
+          display: flex;
+          gap: 8px;
+        }
+  
+        .toggle-btn {
+          padding: 9px 18px;
+          border-radius: 999px;
+          border: 1px solid #e7d8c7;
+          background: #fffdfa;
+          color: #6f6155;
+          font-size: .8rem;
+          font-weight: 700;
+          cursor: pointer;
+          transition: .18s;
+        }
+  
+        .toggle-btn.selected {
+          background: #ff6b2c;
+          border-color: #ff6b2c;
+          color: white;
+        }
+  
+        .save-btn {
+          width: 100%;
+          margin-top: 20px;
+          padding: 14px;
+          border-radius: 14px;
+          border: 0;
+          background: #ff6b2c;
+          color: white;
+          font-weight: 800;
+          font-size: .95rem;
+          cursor: pointer;
+          transition: .18s;
+        }
+  
+        .save-btn:hover {
+          background: #ff8f4d;
+          transform: translateY(-1px);
+        }
+  
+        .save-btn:disabled {
+          opacity: .55;
+          cursor: not-allowed;
+          transform: none;
+        }
+  
+        /* Responsive */
+  
+        @media (max-width: 980px) {
+          .hero-card,
+          .content-grid {
+            grid-template-columns: 1fr;
+          }
+  
+          .content {
+            padding: 24px 20px;
+          }
+  
+          .fields {
+            grid-template-columns: 1fr;
+          }
+  
+          .field:nth-child(7),
+          .field:nth-child(8) {
+            grid-column: auto;
+          }
+        }
+  
+        @media (max-width: 640px) {
+          .content {
+            padding: 20px 14px 92px;
+          }
+  
+          .profile-card {
+            align-items: flex-start;
+            flex-direction: column;
+          }
+  
+          .avatar {
+            width: 86px;
+            height: 86px;
+            border-radius: 24px;
+          }
+  
+          .side-card {
+            grid-template-columns: 1fr 1fr;
+          }
+  
+          .details {
+            grid-template-columns: 1fr;
+          }
+  
+          .detail.full {
+            grid-column: auto;
+          }
+  
+          .topbar {
+            align-items: flex-end;
+          }
+  
+          .title-wrap h1 {
+            font-size: 3rem;
+          }
+  
+          .edit-top {
+            padding: 10px 13px;
+          }
+  
+          .profile-copy h2 {
+            font-size: 1.6rem;
+          }
+  
+          .fields {
+            grid-template-columns: 1fr;
+          }
+        }
+  
       `}</style>
     </div>
   );
