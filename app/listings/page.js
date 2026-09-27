@@ -353,7 +353,11 @@ function MyHouse() {
         style={{
           flex: 1,
           padding: "40px 32px 60px",
-          background: "#ffffff",
+          background: `
+          radial-gradient(circle at 90% 10%, rgba(255,173,116,.16), transparent 28%),
+          radial-gradient(circle at 20% 90%, rgba(244,206,170,.18), transparent 30%),
+          #f6efe3
+        `,
           fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif",
         }}
       >

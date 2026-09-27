@@ -471,16 +471,20 @@ function Roommates() {
     <div style={{ display: "flex" }}>
       <Sidebar />
       <main
-        style={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          paddingTop: 44,
-          paddingBottom: 44,
-          minHeight: "100vh",
-          background: "#f9fafb",
-        }}
+        style={{ 
+            flex: 1, 
+            display: "flex", 
+            flexDirection: "column", 
+            alignItems: "center", 
+            paddingTop: 44, 
+            paddingBottom: 44, 
+            minHeight: "100vh", 
+            background: `
+              radial-gradient(circle at 90% 10%, rgba(255,173,116,.16), transparent 28%),
+              radial-gradient(circle at 20% 90%, rgba(244,206,170,.18), transparent 30%),
+              #f6efe3
+            `,
+          }}
       >
         {!fetching && error && (
           <p style={{ color: "#ef4444", fontWeight: 600 }}>{error}</p>
